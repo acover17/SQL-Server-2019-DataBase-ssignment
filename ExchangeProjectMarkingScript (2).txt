@@ -1,0 +1,60 @@
+mkdir C:\projectscript
+
+&{
+Get-NetIPConfiguration
+Get-ADDomainController | ft Name,IsGlobalCatalog
+Get-ADDomain | fl Name,DomainMode
+Get-ADForest | fl Name,ForestMode
+} > C:\projectscript\Setup.txt
+
+Get-MailboxDatabase | fl Identity,Server,EdbFilePath,DatabaseCopies,ProhibitSendQuota,ProhibitSendReceiveQuota,AllowFileRestore,Recovery > C:\projectscript\Databases.txt
+
+&{
+Get-SendConnector | fl AddressSpaces,SourceTransportServers
+Get-OutlookAnywhere | fl InternalHostName,ExternalHostName
+Get-OWAVirtualDirectory | fl InternalURL,ExternalUrl
+Get-ActiveSyncVirtualDirectory | fl InternalUrl,ExternalUrl
+} > C:\projectscript\Protocols.txt
+
+&{
+Get-ADGroup -Filter { Mail -Like "*" -And GroupCategory -eq "Security" } 
+Get-EmailAddressPolicy | fl Name,RecipientFilter,IncludedRecipients,EnabledEmailAddressTemplates
+} > C:\projectscript\GroupsPolicies.txt
+
+&{
+Get-Mailbox | fl Alias,ServerName,Database,ArchiveDatabase,ProhibitSendQuota,ProhibitSendReceiveQuota,ForwardingAddress,LitigationHoldEnabled,PrimarySMTPAddress,EmailAddresses,CustomAttribute1,Department,AcceptMessagesOnlyFrom,AcceptMessagesOnlyFromSendersOrMembers,ProtocolSettings
+Get-MailUser | fl Alias,ServerName,Database,ArchiveDatabase,ProhibitSendQuota,ProhibitSendReceiveQuota,ForwardingAddress,LitigationHoldEnabled,PrimarySMTPAddress,EmailAddresses,CustomAttribute1,Department,AcceptMessagesOnlyFrom,AcceptMessagesOnlyFromSendersOrMembers,ProtocolSettings
+Get-MailContact | fl Alias,ServerName,Database,ArchiveDatabase,ProhibitSendQuota,ProhibitSendReceiveQuota,ForwardingAddress,LitigationHoldEnabled,PrimarySMTPAddress,EmailAddresses,CustomAttribute1,Department,AcceptMessagesOnlyFrom,AcceptMessagesOnlyFromSendersOrMembers,ProtocolSettings
+} > C:\projectscript\Recipients.txt
+
+Get-AddressList > C:\projectscript\Addresslists.txt
+
+&{
+Get-PublicFolder -Identity "\Feedback" | fl Name,ContentMailboxName,FolderClass,MailEnabled
+Get-PublicFolder -Identity "\Forum" | fl Name,ContentMailboxName,FolderClass,MailEnabled
+Get-PublicFolder -Identity "\Forum\ProjectA" | fl Name,ContentMailboxName,FolderClass,MailEnabled
+Get-PublicFolder -Identity "\Forum\ProjectB" | fl Name,ContentMailboxName,FolderClass,MailEnabled
+Get-PublicFolder -Identity "\Forum\ProjectC" | fl Name,ContentMailboxName,FolderClass,MailEnabled
+Get-PublicFolderStatistics
+Get-PublicFolderClientPermission -identity "\Feedback"
+Get-PublicFolderClientPermission -identity "\Forum"
+Get-PublicFolderClientPermission -identity "\Forum\ProjectA"
+Get-PublicFolderClientPermission -identity "\Forum\ProjectB"
+Get-PublicFolderClientPermission -identity "\Forum\ProjectC"
+} > C:\projectscript\Publicfolders.txt
+
+&{
+Get-OWAMailboxPolicy | fl Name,ChangePasswordEnabled
+Get-DynamicDistributionGroup | fl Alias,RecipientFilter,IncludedRecipients
+Get-RetentionPolicy
+Get-RetentionPolicyTag |fl name,type,agelimitforretention,movetodestinationfolder
+Get-MailboxPermission "Mathew Perry"
+} > C:\projectscript\OwaDistRetentionPermission.txt
+
+&{
+Get-TransportRule | fl Name,Description
+Get-OrganizationConfig |fl SCLJunkThreshold
+Get-IPBlockListProvider
+wbadmin get versions
+} > C:\projectscript\RulesSpamBackup.txt
+
